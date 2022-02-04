@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+group 'org.mapstruct.spring'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+}
