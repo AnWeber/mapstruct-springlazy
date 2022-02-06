@@ -1,4 +1,4 @@
-package com.github.anweber.mapstruct.processor;
+package io.github.anweber.mapstruct.processor;
 
 import java.util.ArrayList;
 import java.util.Arrays;

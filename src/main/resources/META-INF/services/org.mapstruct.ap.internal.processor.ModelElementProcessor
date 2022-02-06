@@ -1,1 +1,1 @@
-com.github.anweber.mapstruct.processor.LazySpringComponentProcessor
+io.github.anweber.mapstruct.processor.LazySpringComponentProcessor
