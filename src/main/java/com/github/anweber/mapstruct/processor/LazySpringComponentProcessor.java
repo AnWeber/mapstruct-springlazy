@@ -1,4 +1,4 @@
-package org.mapstruct.ap.internal.processor;
+package com.github.anweber.mapstruct.processor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,13 +6,14 @@ import java.util.Collections;
 import java.util.List;
 import org.mapstruct.ap.internal.model.Annotation;
 import org.mapstruct.ap.internal.model.Mapper;
+import org.mapstruct.ap.internal.processor.SpringComponentProcessor;
 
 
 public class LazySpringComponentProcessor extends SpringComponentProcessor  {
 
   @Override
   protected String getComponentModelIdentifier() {
-    return "spring_lazy";
+    return "springlazy";
   }
 
   @Override
@@ -28,6 +29,7 @@ public class LazySpringComponentProcessor extends SpringComponentProcessor  {
     annotations.add(lazy());
     return annotations;
   }
+
   private Annotation lazy() {
     return new Annotation( getTypeFactory().getType( "org.springframework.context.annotation.Lazy" ) );
   }
