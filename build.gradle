@@ -1,5 +1,7 @@
 plugins {
     id 'java'
+    id 'maven-publish'
+    id 'signing'
 }
 
 group 'org.mapstruct.spring'
@@ -11,4 +13,132 @@ repositories {
 
 dependencies {
     implementation 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            customizePom(pom)
+            groupId 'com.github.anweber'
+            artifactId 'mapstruct-springlazy'
+            version '1.0.0'
+
+            from components.java
+
+            // create the sign pom artifact
+            pom.withXml {
+                def pomFile = file("${project.buildDir}/generated-pom.xml")
+                writeTo(pomFile)
+                def pomAscFile = signing.sign(pomFile).signatureFiles[0]
+                artifact(pomAscFile) {
+                    classifier = null
+                    extension = 'pom.asc'
+                }
+            }
+
+            artifact(sourcesJar) {
+                classifier = 'sources'
+            }
+            artifact(javadocJar) {
+                classifier = 'javadoc'
+            }
+
+            // create the signed artifacts
+            project.tasks.signArchives.signatureFiles.each {
+                artifact(it) {
+                    def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
+                    if (matcher.find()) {
+                        classifier = matcher.group(1)
+                    } else {
+                        classifier = null
+                    }
+                    extension = 'jar.asc'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username sonatypeUsername
+                password sonatypePassword
+            }
+        }
+    }
+}
+
+def customizePom(pom) {
+    pom.withXml {
+        def root = asNode()
+
+        // eliminate test-scoped dependencies (no need in maven central POMs)
+        root.dependencies.removeAll { dep ->
+            dep.scope == "test"
+        }
+
+        // add all items necessary for maven central publication
+        root.children().last() + {
+            resolveStrategy = Closure.DELEGATE_FIRST
+
+            description 'MapStruct Spring Lazy adds additional @Lazy Annotation to every Mapper, which is referenced with uses. Adding @Lazy can break a circular references, which is no longer allowed in Spring Boot 2.6.'
+            name 'mapstruct-springlazy'
+            url 'https://github.com/AnWeber/mapstruct-springlazy'
+            organization {
+                name 'com.github.anweber'
+                url 'https://github.com/anweber'
+            }
+            issueManagement {
+                system 'GitHub'
+                url 'https://github.com/AnWeber/mapstruct-springlazy/issues'
+            }
+            licenses {
+                license {
+                    name 'Apache License 2.0'
+                    url 'https://github.com/AnWeber/mapstruct-springlazy/blob/master/LICENSE'
+                    distribution 'repo'
+                }
+            }
+            scm {
+                url 'https://github.com/AnWeber/mapstruct-springlazy'
+                connection 'scm:git:git://github.com/anweber/mapstruct-springlazy.git'
+                developerConnection 'scm:git:ssh://git@github.com:anweber/mapstruct-springlazy.git'
+            }
+            developers {
+                developer {
+                    name 'anweber'
+                }
+            }
+        }
+    }
+}
+
+model {
+    tasks.generatePomFileForMavenJavaPublication {
+        destination = file("$buildDir/generated-pom.xml")
+    }
+    tasks.publishMavenJavaPublicationToMavenLocal {
+        dependsOn project.tasks.signArchives
+    }
+    tasks.publishMavenJavaPublicationToMavenRepository {
+        dependsOn project.tasks.signArchives
+    }
 }
