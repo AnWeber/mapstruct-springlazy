@@ -38,7 +38,7 @@ Add Jar to your dependencies
                         <version>${org.mapstruct.version}</version>
                     </path>
                     <path>
-                        <groupId>com.github.anweber</groupId>
+                        <groupId>io.github.anweber</groupId>
                         <artifactId>mapstruct-springlazy</artifactId>
                         <version>1.0.0</version>
                     </path>
@@ -57,7 +57,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.4.2.Final'
  
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
-    annotationProcessor 'com.github.anweber:mapstruct-springlazy:1.0.0'
+    annotationProcessor 'io.github.anweber:mapstruct-springlazy:1.0.0'
 }
 ```
 
